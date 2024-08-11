@@ -6,43 +6,43 @@ echo -e "- Ucitavam promenljive iz my_k3s_cluster.config fajla"
 source ./my_k3s_cluster.config
 
 
-# echo -e "- Skidam k3s bez traefik-a, kube-proxy-ja, flanena, servicelb i network-policy-ja\n"
-# export INSTALL_K3S_EXEC=" --flannel-backend=none --disable-network-policy --disable servicelb --disable traefik"
-# curl -sfL https://get.k3s.io | sh -
+echo -e "- Skidam k3s bez traefik-a, kube-proxy-ja, flanena, servicelb i network-policy-ja\n"
+export INSTALL_K3S_EXEC=" --flannel-backend=none --disable-network-policy --disable servicelb --disable traefik"
+curl -sfL https://get.k3s.io | sh -
 
 
-# echo -e "\n- Namestam kubeconfig"
-# mkdir -p $HOME/.kube
-# sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
-# sudo chown $USER:$USER $HOME/.kube/config
+echo -e "\n- Namestam kubeconfig"
+mkdir -p $HOME/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
+sudo chown $USER:$USER $HOME/.kube/config
 
 
-# if grep -q KUBECONFIG $HOME/.bashrc; then
-# 	echo -e "\t...KUBECONFIG postoji vec u .bashrc-u" 
-# else
-# 	echo -e "\t...Upisujem KUBECONFIG u .bashrc"
-# 	echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
-# 	source $HOME/.bashrc
-# fi
+if grep -q KUBECONFIG $HOME/.bashrc; then
+	echo -e "\t...KUBECONFIG postoji vec u .bashrc-u" 
+else
+	echo -e "\t...Upisujem KUBECONFIG u .bashrc"
+	echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
+	source $HOME/.bashrc
+fi
 
 
-# echo -e "\n- Pokrecem skriptu spremi_alate.sh"
-# ./scripts/spremi_alate.sh
+echo -e "\n- Pokrecem skriptu spremi_alate.sh"
+./scripts/spremi_alate.sh
 
 
-# echo -e "\n- Instaliram cilium"
-# if grep -q bpf  /etc/fstab; then
-#     echo -e "\t* Proveravam bpf...bpf postoji vec u /etc/fstab-u"
-# else
-#     echo -e "\t* Proveravam bpf...Upisujem u /etc/fstab"
-#     sudo mount bpffs -t bpf /sys/fs/bpf
-#     sudo bash -c 'cat <<EOF >> /etc/fstab
-#     none /sys/fs/bpf bpf rw,relatime 0 0
-#     EOF'
+echo -e "\n- Instaliram cilium"
+if grep -q bpf  /etc/fstab; then
+    echo -e "\t* Proveravam bpf...bpf postoji vec u /etc/fstab-u"
+else
+    echo -e "\t* Proveravam bpf...Upisujem u /etc/fstab"
+    sudo mount bpffs -t bpf /sys/fs/bpf
+    sudo bash -c 'cat <<EOF >> /etc/fstab
+    none /sys/fs/bpf bpf rw,relatime 0 0
+    EOF'
     
-#     sudo systemctl daemon-reload
-#     sudo systemctl restart local-fs.target
-# fi
+    sudo systemctl daemon-reload
+    sudo systemctl restart local-fs.target
+fi
 
 echo -e "\n- Instaliram cilum u namespace $CILIUM_NAMESPACE, verzija $CILIUM_VERSION"
 export CILIUM_LB_IP=$(hostname -I|cut -d ' ' -f1)
