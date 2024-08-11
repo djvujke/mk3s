@@ -44,37 +44,30 @@ else
     sudo systemctl restart local-fs.target
 fi
 
-echo -e "\n- Instaliram cilum u namespace $CILIUM_NAMESPACE, verzija $CILIUM_VERSION"
-export CILIUM_LB_IP=$(hostname -I|cut -d ' ' -f1)
+# helm repo add cilium https://helm.cilium.io/
+# helm repo update
+# helm upgrade --install cilium cilium/cilium \
+# 	--version $CILIUM_VERSION \
+# 	--create-namespace \
+# 	--namespace $CILIUM_NAMESPACE \
+# 	--set operator.replicas=1 \
+# 	--set ipam.operator.clusterPoolIPv4PodCIDRList=$CILIUM_CLUSTER_CIDR\
+# 	--set ipv4NativeRoutingCIDR=$CILIUM_CLUSTER_CIDR \
+# 	--set ipv4.enabled=true \
+# 	--set loadBalancer.mode=dsr \
+# 	--set kubeProxyReplacement=strict \
+# 	--set routingMode=native \
+# 	--set autoDirectNodeRoutes=true \
+# 	--set hubble.relay.enabled=true \
+# 	--set hubble.ui.enabled=true \
+# 	--set l2announcements.enabled=true \
+# 	-f yaml/my-values.yaml
 
-envsubst '${CILIUM_LB_IP}' < yaml/lb-ipam.yaml > yaml/my-lb-ipam.yaml
-envsubst '${CILIUM_LB_IP}' < yaml/values.yaml > yaml/my-values.yaml
+# kubectl apply -f yaml/announce.yaml
+# # envsubst '${CILIUM_LB_IP}' < yaml/lb-ipam.yaml | 
+# kubectl apply -f yaml/my-lb-ipam.yaml
 
-
-helm repo add cilium https://helm.cilium.io/
-helm repo update
-helm upgrade --install cilium cilium/cilium \
-	--version $CILIUM_VERSION \
-	--create-namespace \
-	--namespace $CILIUM_NAMESPACE \
-	--set operator.replicas=1 \
-	--set ipam.operator.clusterPoolIPv4PodCIDRList=$CILIUM_CLUSTER_CIDR\
-	--set ipv4NativeRoutingCIDR=$CILIUM_CLUSTER_CIDR \
-	--set ipv4.enabled=true \
-	--set loadBalancer.mode=dsr \
-	--set kubeProxyReplacement=strict \
-	--set routingMode=native \
-	--set autoDirectNodeRoutes=true \
-	--set hubble.relay.enabled=true \
-	--set hubble.ui.enabled=true \
-	--set l2announcements.enabled=true \
-	-f yaml/my-values.yaml
-
-kubectl apply -f yaml/announce.yaml
-# envsubst '${CILIUM_LB_IP}' < yaml/lb-ipam.yaml | 
-kubectl apply -f yaml/my-lb-ipam.yaml
-
-rm -f yaml/my-lb-ipam.yaml yaml/my-values.yaml
+# rm -f yaml/my-lb-ipam.yaml yaml/my-values.yaml
 
 
-cilium -n$CILIUM_NAMESPACE status --wait
+# cilium -n$CILIUM_NAMESPACE status --wait
