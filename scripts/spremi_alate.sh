@@ -1,13 +1,23 @@
 #!/bin/bash
 
-echo -e "\t* Skidam arkade koji ce posle instalirati druge alate"
-wget https://github.com/alexellis/arkade/releases/download/$ARKADE_VER/arkade -O arkade > /dev/null 2>&1
+# Exit on any error
+set -e
 
-echo -e "\t* Prebacujem u /usr/local/bin"
+# Load print helper functions
+source "$(dirname "$0")/print_helper.sh"
+
+cprint "Skidam arkade koji ce posle instalirati druge alate" 1 "star"
+if ! wget https://github.com/alexellis/arkade/releases/download/$ARKADE_VER/arkade -O arkade > /dev/null 2>&1; then
+    cprint_error "Neuspesno preuzimanje arkade!"
+fi
+
+cprint "Prebacujem u /usr/local/bin" 1 "star"
 chmod +x arkade
-sudo mv arkade /usr/local/bin
+if ! sudo mv arkade /usr/local/bin; then
+    cprint_error "Neuspesno prebacivanje arkade u /usr/local/bin!"
+fi
 
-echo -e "\t* Instaliram software uz pomoc arkade"
+cprint "Instaliram software uz pomoc arkade" 1 "star"
 
 # Ubaci u niz software koji zelis da se instalira uz pomoc arkade
 declare -a arkade_to_install=("k9s" "kubectl"  
@@ -17,25 +27,22 @@ declare -a arkade_to_install=("k9s" "kubectl"
    "kubeval" "kubetail" "kubeseal" "kubens"
    "jq" "fzf" "cilium" "hubble" "argocd" "argocd-autopilot" )
 
-
 for i in "${arkade_to_install[@]}"
 do
-   echo -e "\t\t- $i"
+   cprint "$i" 2
    arkade get $i >/dev/null 2>&1
 done
 
-
-echo -e "\t* Prebacujem skinuti software u /usr/local/bin"
+cprint "Prebacujem skinuti software u /usr/local/bin" 1 "star"
 chmod +x $HOME/.arkade/bin/*
 sudo mv $HOME/.arkade/bin/* /usr/local/bin/
 
-
-echo -e "\t* Kopiram kube precice"
+cprint "Kopiram kube precice" 1 "star"
 cp scripts/kube.stuff $HOME/.kube.stuff
 if grep -q .kube.stuff  $HOME/.bashrc; then
-   echo -e "\t* .kube.stuff vec postoji u .bashrc"
+   cprint ".kube.stuff vec postoji u .bashrc" 2
 else
-   echo -e "\t* .kube.stuff upisujem u .bashrc"
+   cprint ".kube.stuff upisujem u .bashrc" 2
    echo "source $HOME/.kube.stuff" >> $HOME/.bashrc
    source $HOME/.bashrc    
 fi
