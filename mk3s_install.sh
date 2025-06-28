@@ -10,18 +10,14 @@ source "$(dirname "$0")/scripts/print_helper.sh"
 
 # Main installation header
 cprint "K3s + Cilium Installation" 0 "equal"
-
-# Check if running as root
 if [[ $EUID -eq 0 ]]; then
-   cprint_error "Ova skripta ne sme da se pokrece kao root!"
+   cprint_error "Ova skripta ne sme da se pokrece kao root! Ali trazi sudo"
 fi
 
 cprint "Ucitavam promenljive iz my_k3s_cluster.config fajla" 0 "dash"
-if [[ ! -f "./my_k3s_cluster.config" ]]; then
-    cprint "Greska: Fajl my_k3s_cluster.config ne postoji!" 0 "bracket"
-    exit 1
+if ! source "$(dirname "$0")/configs/my_k3s_cluster.config"; then
+    cprint_error "Greska: Fajl my_k3s_cluster.config ne postoji!" 0 "bracket"
 fi
-source ./my_k3s_cluster.config
 
 cprint "Skidam k3s bez traefik-a, kube-proxy-ja, flanena, servicelb i network-policy-ja" 0 "dash"
 export INSTALL_K3S_EXEC=" --flannel-backend=none --disable-network-policy --disable servicelb --disable traefik"
@@ -33,11 +29,11 @@ sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
 sudo chown $USER:$USER $HOME/.kube/config
 
 if grep -q KUBECONFIG $HOME/.bashrc; then
-	cprint "KUBECONFIG postoji vec u .bashrc-u" 1
+  cprint "KUBECONFIG postoji vec u .bashrc-u" 1
 else
-	cprint "Upisujem KUBECONFIG u .bashrc" 1
-	echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
-	source $HOME/.bashrc
+  cprint "Upisujem KUBECONFIG u .bashrc" 1
+  echo "export KUBECONFIG=$HOME/.kube/config" >> $HOME/.bashrc
+  source $HOME/.bashrc
 fi
 
 cprint "Pokrecem skriptu spremi_alate.sh" 0 "dash"
@@ -50,8 +46,8 @@ else
     cprint "Proveravam bpf...Upisujem u /etc/fstab" 1 "star"
     sudo mount bpffs -t bpf /sys/fs/bpf
     sudo bash -c 'cat <<EOF >> /etc/fstab
-    none /sys/fs/bpf bpf rw,relatime 0 0
-    EOF'
+none /sys/fs/bpf bpf rw,relatime 0 0
+EOF'
     
     sudo systemctl daemon-reload
     sudo systemctl restart local-fs.target
